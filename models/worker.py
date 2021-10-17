@@ -276,9 +276,16 @@ class Worker:
     """
     api related
     """
-
     def _get_api(self):
         if self._api:
             return self._api
         self._api = EXCHANGE_APIS[self.exchange](market=self.market)
         return self._api
+
+    def __hash__(self):
+        return hash(self.worker_id)
+
+    def __eq__(self, other: Worker) -> bool:
+        if isinstance(other, Worker):
+            return self.worker_id == other.worker_id
+        return False
