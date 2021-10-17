@@ -3,9 +3,10 @@ from __future__ import annotations
 from abc import ABC, abstractmethod
 from datetime import datetime
 from typing import List
+from uuid import uuid4
 
 from models.order import Order
-from constants import Market, PriceUnit, OrderType
+from constants import Market, PriceUnit, OrderType, OrderStatus
 from values import Price
 
 
@@ -129,10 +130,20 @@ class CoinoneExchangeAPI(AbstractExchangeAPI):
 class FakeExchangeAPI(AbstractExchangeAPI):
     def __init__(self, market: Market):
         super().__init__(market)
+        self.fee_rate = 0.0005
         self._orders = list()
 
     def buy_order(self, price: float, budget: int) -> Order:
-        order = Order()
+        order = Order(
+            order_id=str(uuid4()),
+            type=OrderType.BUY,
+            status=OrderStatus.WAIT,
+            price=price,
+            ordered_volume=(budget * (1 - self.fee_rate)) / price,
+            executed_volume=0.0,
+            paid_fee=0.0,
+            ordered_time=datetime.now(),
+        )
         self._orders.append(order)
         return order
 
@@ -148,7 +159,13 @@ class FakeExchangeAPI(AbstractExchangeAPI):
         pass
 
     def get_orders(self, order_ids: List[str]) -> List[Order]:
-        pass
+        orders = [order for order in self._orders if order.order_id in order_ids]
+        results = list()
+        for order in orders:
+            if order.status == OrderStatus.WAIT:
+                order.status = OrderStatus.DONE
+            results.append(order)
+        return results
 
     def get_prices(self, price_unit: PriceUnit, counts: int, to: datetime) -> List[
         Price]:

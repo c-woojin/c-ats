@@ -32,3 +32,9 @@ class PriceUnit(IntEnum):
 class OrderType(IntEnum):
     BUY = 1
     SELL = 2
+
+
+class OrderStatus(IntEnum):
+    WAIT = 1
+    DONE = 2
+    CANCEL = 3
