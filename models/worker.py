@@ -3,14 +3,25 @@ from dataclasses import dataclass, field
 from typing import Dict, Type, List, Optional, Tuple, Set
 from uuid import uuid4
 
-from constants import Exchange, Market, WorkerStatus, DEFAULT_BUDGET, OrderStatus, \
-    PriceUnit, OrderType, SELL_RATE, MIN_ORDER_BUDGET, ADDITIONAL_BUY_RATE
+from constants import (
+    Exchange,
+    Market,
+    WorkerStatus,
+    DEFAULT_BUDGET,
+    OrderStatus,
+    PriceUnit,
+    OrderType,
+    SELL_RATE,
+    MIN_ORDER_BUDGET,
+    ADDITIONAL_BUY_RATE,
+)
 from models.exchange_api import (
     AbstractExchangeAPI,
     UpbitExchangeAPI,
     BithumbExchangeAPI,
     CoinoneExchangeAPI,
-    FakeExchangeAPI, APIError,
+    FakeExchangeAPI,
+    APIError,
 )
 from models.order import Order
 from values import Price
@@ -53,6 +64,7 @@ class Worker:
     """
     Main methods
     """
+
     def work_for_watching(self):
         self._update_prices_from_api()
         if self._is_buy_timing():
@@ -73,9 +85,14 @@ class Worker:
         if self._need_to_cancel_buy_order_due_to_trade_price_rising():
             api.cancel_order(latest_order.order_id)
         elif self._need_to_sell_or_buy_order():
-            self._spend_budget(spent_budget=latest_order.executed_volume * latest_order.price + latest_order.paid_fee)
+            self._spend_budget(
+                spent_budget=latest_order.executed_volume * latest_order.price
+                + latest_order.paid_fee
+            )
             buy_price_average = self._calculate_buy_price_average()
-            order = api.sell_order(price=buy_price_average * SELL_RATE, volume=self.balance)
+            order = api.sell_order(
+                price=buy_price_average * SELL_RATE, volume=self.balance
+            )
             self.orders.add(order)
             self.status = WorkerStatus.SELLING
         else:
@@ -91,7 +108,10 @@ class Worker:
         if self._need_to_cancel_sell_order_due_to_trade_price_drop():
             api.cancel_order(latest_order.order_id)
         elif self._need_to_sell_or_buy_order():
-            order = api.buy_order(price=self._get_next_additional_buy_price(), budget=self._get_unit_budget())
+            order = api.buy_order(
+                price=self._get_next_additional_buy_price(),
+                budget=self._get_unit_budget(),
+            )
             self.orders.add(order)
             self.status = WorkerStatus.BUYING
         else:
@@ -111,15 +131,18 @@ class Worker:
 
         if latest_order and trade_price:
             is_buying_status = self.status == WorkerStatus.BUYING
-            is_price_rising_for_selling_order = trade_price >= buy_price_average if buy_price_average else False
+            is_price_rising_for_selling_order = (
+                trade_price >= buy_price_average if buy_price_average else False
+            )
             is_price_rising_for_returning_watching = trade_price > latest_order.price
             has_balance = self.balance > 0
             can_cancel_order = latest_order.status == OrderStatus.WAIT
             return (
-                is_buying_status and can_cancel_order and
-                (
-                    (has_balance and is_price_rising_for_selling_order) or
-                    (not has_balance and is_price_rising_for_returning_watching)
+                is_buying_status
+                and can_cancel_order
+                and (
+                    (has_balance and is_price_rising_for_selling_order)
+                    or (not has_balance and is_price_rising_for_returning_watching)
                 )
             )
         return False
@@ -130,11 +153,20 @@ class Worker:
         trade_price = self._get_trade_price()
         next_additional_buy_price = self._get_next_additional_buy_price()
 
-        if latest_order and latest_buy_order and trade_price and next_additional_buy_price:
+        if (
+            latest_order
+            and latest_buy_order
+            and trade_price
+            and next_additional_buy_price
+        ):
             is_selling_status = self.status == WorkerStatus.SELLING
-            is_price_drop_for_additional_buy = trade_price <= next_additional_buy_price
+            is_price_drop_for_additional_buy = (
+                trade_price <= next_additional_buy_price
+            )
             has_budget = self._get_unit_budget() > 0
-            return is_selling_status and is_price_drop_for_additional_buy and has_budget
+            return (
+                is_selling_status and is_price_drop_for_additional_buy and has_budget
+            )
         return False
 
     def _need_to_sell_or_buy_order(self) -> bool:
@@ -149,6 +181,7 @@ class Worker:
     """
     Budgets related
     """
+
     def _get_unit_budget(self) -> int:
         budgets = self.budget.split(":")
         if budgets and budgets[0] and int(budgets[0]) >= MIN_ORDER_BUDGET:
@@ -158,7 +191,7 @@ class Worker:
     def _spend_budget(self, spent_budget: float):
         budgets = self.budget.split(":")
         if int(budgets[0]) - spent_budget > MIN_ORDER_BUDGET:
-            budgets[0] = int(budgets) - spent_budget
+            budgets[0] = str(int(budgets[0]) - spent_budget)
         else:
             budgets.pop(0)
         self.budget = ":".join(budgets)
@@ -166,6 +199,7 @@ class Worker:
     """
     Orders related
     """
+
     def _update_orders_from_api(self) -> None:
         wait_orders = self._get_orders_by_status(statuses=(OrderStatus.WAIT,))
         if wait_orders:
@@ -181,8 +215,14 @@ class Worker:
     def _get_orders_by_type(self, types: Tuple[OrderType, ...]) -> List[Order]:
         return [order for order in self.orders if order.type in types]
 
-    def _get_latest_order(self, order_type: Optional[OrderType] = None) -> Optional[Order]:
-        orders = [order for order in self.orders if order.type == order_type] if order_type else self.orders
+    def _get_latest_order(
+        self, order_type: Optional[OrderType] = None
+    ) -> Optional[Order]:
+        orders = (
+            [order for order in self.orders if order.type == order_type]
+            if order_type
+            else self.orders
+        )
         if orders:
             return max(orders)  # type: ignore
         return None
@@ -190,13 +230,19 @@ class Worker:
     def _calculate_buy_price_average(self) -> Optional[float]:
         buy_orders = self._get_orders_by_type(types=(OrderType.BUY,))
         if buy_orders:
-            total_funds = sum([order.price * order.executed_volume + order.paid_fee for order in buy_orders])
+            total_funds = sum(
+                [
+                    order.price * order.executed_volume + order.paid_fee
+                    for order in buy_orders
+                ]
+            )
             return total_funds / len(buy_orders)
         return None
 
     """
     Balance related
     """
+
     def _update_balance_from_api(self):
         api = self._get_api()
         self.balance = api.get_balance()
@@ -204,6 +250,7 @@ class Worker:
     """
     Prices related
     """
+
     def _update_prices_from_api(self) -> None:
         api = self._get_api()
         self.prices = api.get_prices(price_unit=PriceUnit.HOUR, counts=24)
@@ -222,11 +269,14 @@ class Worker:
 
     def _get_next_additional_buy_price(self) -> Optional[float]:
         latest_buy_order = self._get_latest_order(order_type=OrderType.BUY)
-        return latest_buy_order.price * ADDITIONAL_BUY_RATE if latest_buy_order else None
+        return (
+            latest_buy_order.price * ADDITIONAL_BUY_RATE if latest_buy_order else None
+        )
 
     """
     api related
     """
+
     def _get_api(self):
         if self._api:
             return self._api

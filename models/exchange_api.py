@@ -197,13 +197,16 @@ class FakeExchangeAPI(AbstractExchangeAPI):
             PriceUnit.HOUR: "hours",
             PriceUnit.DAY: "days",
         }
-        now = Arrow.now().floor(time_units[price_unit])
-        return [Price(
-            date_time=now.shift(**{time_units[price_unit]: -i}).datetime,
-            high_price=Faker().pyfloat(),
-            low_price=Faker().pyfloat(),
-            trade_price=Faker().pyfloat(),
-        ) for i in range(counts)]
+        now = Arrow.now().floor(time_units[price_unit])  # type: ignore
+        return [
+            Price(
+                date_time=now.shift(**{time_units[price_unit]: -i}).datetime,
+                high_price=Faker().pyfloat(),
+                low_price=Faker().pyfloat(),
+                trade_price=Faker().pyfloat(),
+            )
+            for i in range(counts)
+        ]
 
     def get_balance(self) -> float:
         return Faker().pyfloat()
