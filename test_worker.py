@@ -1,5 +1,6 @@
 from datetime import datetime
 from typing import Callable
+from unittest.mock import MagicMock
 
 from constants import Exchange, WorkerStatus, OrderStatus
 from models.order import Order
@@ -13,7 +14,7 @@ def test_is_buy_timing_return_true_when_trader_price_is_lower_then_average():
     p3 = Price(datetime.now(), 1500, 600, 600)
 
     worker = Worker(prices=[p1, p2, p3])
-    assert worker.is_buy_timing() is True
+    assert worker._is_buy_timing() is True
 
 
 def test_is_buy_timing_return_false_when_trader_price_is_greater_then_average():
@@ -22,31 +23,27 @@ def test_is_buy_timing_return_false_when_trader_price_is_greater_then_average():
     p3 = Price(datetime.now(), 1500, 600, 1500)
 
     worker = Worker(prices=[p1, p2, p3])
-    assert worker.is_buy_timing() is False
+    assert worker._is_buy_timing() is False
 
 
 def test_get_unit_budget_when_budget_remains():
-    worker = Worker(budget="1000:2000")
-    unit_budget = worker.get_unit_budget()
-    assert unit_budget == 1000
+    worker = Worker(budget="10000:20000")
+    unit_budget = worker._get_unit_budget()
+    assert unit_budget == 10000
 
 
 def test_get_unit_budget_gets_zero_when_budget_is_empty():
     worker = Worker(budget="")
-    unit_budget = worker.get_unit_budget()
+    unit_budget = worker._get_unit_budget()
     assert unit_budget == 0
 
 
 def test_work_for_watching_buy_order_when_is_buy_timing_is_true():
-    p1 = Price(datetime.now(), 1000.0, 500, 600)
-    p2 = Price(datetime.now(), 1100, 550, 900)
-    p3 = Price(datetime.now(), 1500, 600, 600)
-
     worker = Worker(
-        prices=[p1, p2, p3],
         exchange=Exchange.FAKE,
     )
 
+    worker._is_buy_timing = MagicMock(return_value=True)
     worker.work_for_watching()
 
     assert len(worker.orders) == 1
@@ -62,13 +59,13 @@ def test_get_orders_by_status(get_order: Callable[..., Order]):
         exchange=Exchange.FAKE,
     )
 
-    assert [wait_order] == worker.get_orders_by_status(statuses=(OrderStatus.WAIT,))
-    assert [done_order] == worker.get_orders_by_status(statuses=(OrderStatus.DONE,))
-    assert [cancel_order] == worker.get_orders_by_status(
+    assert [wait_order] == worker._get_orders_by_status(statuses=(OrderStatus.WAIT,))
+    assert [done_order] == worker._get_orders_by_status(statuses=(OrderStatus.DONE,))
+    assert [cancel_order] == worker._get_orders_by_status(
         statuses=(OrderStatus.CANCEL,)
     )
     assert {wait_order, done_order, cancel_order} == set(
-        worker.get_orders_by_status(
+        worker._get_orders_by_status(
             statuses=(OrderStatus.WAIT, OrderStatus.DONE, OrderStatus.CANCEL)
         )
     )
@@ -78,8 +75,16 @@ def test_update_orders_from_api():
     worker = Worker(
         exchange=Exchange.FAKE,
     )
-    order = worker.get_api().buy_order(1000, 50000)
+    order = worker._get_api().buy_order(1000, 50000)
     worker.orders.add(order)
-    worker.update_orders_from_api()
+    worker._update_orders_from_api()
     assert len(worker.orders) == 1
     assert worker.orders.pop().status == OrderStatus.DONE
+
+
+def test_update_prices_from_api():
+    worker = Worker(
+        exchange=Exchange.FAKE,
+    )
+    worker._update_prices_from_api()
+    assert len(worker.prices) == 24

@@ -2,12 +2,19 @@ from __future__ import annotations
 
 from abc import ABC, abstractmethod
 from datetime import datetime
-from typing import List
+from typing import List, Optional, Dict
 from uuid import uuid4
+
+from arrow import Arrow
+from faker import Faker
 
 from models.order import Order
 from constants import Market, PriceUnit, OrderType, OrderStatus
 from values import Price
+
+
+class APIError(Exception):
+    pass
 
 
 class AbstractExchangeAPI(ABC):
@@ -36,7 +43,7 @@ class AbstractExchangeAPI(ABC):
 
     @abstractmethod
     def get_prices(
-        self, price_unit: PriceUnit, counts: int, to: datetime
+        self, price_unit: PriceUnit, counts: int, to: Optional[datetime] = None
     ) -> List[Price]:
         raise NotImplementedError
 
@@ -66,7 +73,7 @@ class UpbitExchangeAPI(AbstractExchangeAPI):
         pass
 
     def get_prices(
-        self, price_unit: PriceUnit, counts: int, to: datetime
+        self, price_unit: PriceUnit, counts: int, to: Optional[datetime] = None
     ) -> List[Price]:
         pass
 
@@ -94,7 +101,7 @@ class BithumbExchangeAPI(AbstractExchangeAPI):
         pass
 
     def get_prices(
-        self, price_unit: PriceUnit, counts: int, to: datetime
+        self, price_unit: PriceUnit, counts: int, to: Optional[datetime] = None
     ) -> List[Price]:
         pass
 
@@ -122,7 +129,7 @@ class CoinoneExchangeAPI(AbstractExchangeAPI):
         pass
 
     def get_prices(
-        self, price_unit: PriceUnit, counts: int, to: datetime
+        self, price_unit: PriceUnit, counts: int, to: Optional[datetime] = None
     ) -> List[Price]:
         pass
 
@@ -183,12 +190,23 @@ class FakeExchangeAPI(AbstractExchangeAPI):
         return results
 
     def get_prices(
-        self, price_unit: PriceUnit, counts: int, to: datetime
+        self, price_unit: PriceUnit, counts: int, to: Optional[datetime] = None
     ) -> List[Price]:
-        pass
+        time_units: Dict[PriceUnit, str] = {
+            PriceUnit.MINUTE: "minutes",
+            PriceUnit.HOUR: "hours",
+            PriceUnit.DAY: "days",
+        }
+        now = Arrow.now().floor(time_units[price_unit])
+        return [Price(
+            date_time=now.shift(**{time_units[price_unit]: -i}).datetime,
+            high_price=Faker().pyfloat(),
+            low_price=Faker().pyfloat(),
+            trade_price=Faker().pyfloat(),
+        ) for i in range(counts)]
 
     def get_balance(self) -> float:
-        pass
+        return Faker().pyfloat()
 
     def make_valid_order_price(self, order_type: OrderType, price: float) -> float:
         pass

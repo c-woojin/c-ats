@@ -1,6 +1,9 @@
 from enum import IntEnum, Enum
 
 DEFAULT_BUDGET = "10000:20000:30000"
+SELL_RATE = 1.1
+ADDITIONAL_BUY_RATE = 0.9
+MIN_ORDER_BUDGET = 10000
 
 
 class WorkerStatus(IntEnum):
