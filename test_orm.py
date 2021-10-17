@@ -1,4 +1,3 @@
-import logging
 from dataclasses import astuple
 from typing import Callable
 
@@ -9,7 +8,9 @@ from models.order import Order
 from models.worker import Worker
 
 
-def test_order_mapper_can_load_orders(session: Session, get_order: Callable[..., Order]):
+def test_order_mapper_can_load_orders(
+    session: Session, get_order: Callable[..., Order]
+):
     o = get_order()
     session.execute(
         "INSERT INTO orders (order_id, type, status, price, ordered_volume, "
@@ -20,13 +21,15 @@ def test_order_mapper_can_load_orders(session: Session, get_order: Callable[...,
     assert session.query(Order).all() == [o]
 
 
-def test_order_mapper_can_save_orders(session: Session, get_order: Callable[..., Order]):
+def test_order_mapper_can_save_orders(
+    session: Session, get_order: Callable[..., Order]
+):
     o = get_order()
     session.add(o)
     session.commit()
 
     rows = list(session.execute('SELECT * FROM "orders"'))
-    o.ordered_time = o.ordered_time.strftime("%Y-%m-%d %H:%M:%S.%f")
+    o.ordered_time = o.ordered_time.strftime("%Y-%m-%d %H:%M:%S.%f")  # type: ignore
     assert rows == [astuple(o)]
 
 
@@ -36,9 +39,9 @@ def test_retrieving_workers(session: Session, get_worker: Callable[..., Worker])
         "INSERT INTO workers (worker_id, market, status, budget, exchange) VALUES  "
         f'("{w.worker_id}", "{w.market}", "{w.status}", "{w.budget}", "{w.exchange}")'
     )
-    w.market = w.market.value
-    w.status = w.status.value
-    w.exchange = w.exchange.value
+    w.market = w.market.value  # type: ignore
+    w.status = w.status.value  # type: ignore
+    w.exchange = w.exchange.value  # type: ignore
     assert session.query(Worker).all() == [w]
 
 
@@ -46,9 +49,7 @@ def test_saving_workers(session: Session, get_worker: Callable[..., Worker]):
     w = get_worker()
     session.add(w)
     session.commit()
-    rows = session.execute(
-        'SELECT * FROM "workers"'
-    )
+    rows = session.execute('SELECT * FROM "workers"')
     assert list(rows) == [(w.worker_id, w.market, w.status, w.budget, w.exchange)]
 
 
@@ -60,7 +61,5 @@ def test_updating_workers(session: Session, get_worker: Callable[..., Worker]):
     w.status = WorkerStatus.BUYING
     session.add(w)
     session.commit()
-    rows = session.execute(
-        'SELECT worker_id, status FROM "workers"'
-    )
+    rows = session.execute('SELECT worker_id, status FROM "workers"')
     assert list(rows) == [(w.worker_id, w.status)]

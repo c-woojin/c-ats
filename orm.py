@@ -1,5 +1,14 @@
-from sqlalchemy import MetaData, Table, Column, String, SmallInteger, Float, DateTime, \
-    Integer, ForeignKey
+from sqlalchemy import (
+    MetaData,
+    Table,
+    Column,
+    String,
+    SmallInteger,
+    Float,
+    DateTime,
+    Integer,
+    ForeignKey,
+)
 from sqlalchemy.orm import mapper, relationship
 
 from models.order import Order
@@ -66,10 +75,14 @@ def start_mappers():
         workers,
         properties={
             "orders": relationship(
-                orders_mapper, secondary=order_list, collection_class=set,
+                orders_mapper,
+                secondary=order_list,
+                collection_class=set,
             ),
             "prices": relationship(
-                prices_mapper, secondary=price_list, collection_class=list,
-            )
+                prices_mapper,
+                secondary=price_list,
+                collection_class=list,
+            ),
         },
     )

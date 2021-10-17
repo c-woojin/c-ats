@@ -1,4 +1,4 @@
-from typing import Callable, Optional, List, Set
+from typing import Callable, Optional, Set
 
 import pytest
 from faker import Faker
@@ -48,14 +48,19 @@ def _order(status: Optional[OrderStatus] = None) -> Order:
 
 @pytest.fixture
 def get_worker() -> Callable[..., Worker]:
-    def _get_worker(status: Optional[WorkerStatus] = None, orders: Optional[Set[Order]] = None) -> Worker:
+    def _get_worker(
+        status: Optional[WorkerStatus] = None, orders: Optional[Set[Order]] = None
+    ) -> Worker:
         return _worker(status, orders)
+
     return _get_worker
 
 
-def _worker(status: Optional[WorkerStatus] = None, orders: Optional[Set[Order]] = None) -> Worker:
+def _worker(
+    status: Optional[WorkerStatus] = None, orders: Optional[Set[Order]] = None
+) -> Worker:
     return Worker(
         market=Faker().random_element(elements=Market),
         status=status or Faker().random_element(elements=WorkerStatus),
-        orders=orders or set()
+        orders=orders or set(),
     )
