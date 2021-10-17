@@ -15,10 +15,10 @@ class Price:
     def __add__(self, other: Any) -> Price:
         if isinstance(other, Price):
             return Price(
-                date_time=max(self, other).date_time,
+                date_time=max(self, other).date_time,  # type: ignore
                 high_price=self.high_price + other.high_price,
                 low_price=self.low_price + other.low_price,
-                trade_price=self.trade_price + other.trade_price
+                trade_price=self.trade_price + other.trade_price,
             )
         raise TypeError
 

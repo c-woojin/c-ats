@@ -17,7 +17,7 @@ class Order:
     paid_fee: float
     ordered_time: datetime
 
-    def __eq__(self, other: Order) -> bool:
+    def __eq__(self, other: Order) -> bool:  # type: ignore
         if isinstance(other, Order):
             return self.order_id == other.order_id
         return False

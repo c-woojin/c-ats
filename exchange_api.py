@@ -35,7 +35,9 @@ class AbstractExchangeAPI(ABC):
         raise NotImplementedError
 
     @abstractmethod
-    def get_prices(self, price_unit: PriceUnit, counts: int, to: datetime) -> List[Price]:
+    def get_prices(
+        self, price_unit: PriceUnit, counts: int, to: datetime
+    ) -> List[Price]:
         raise NotImplementedError
 
     @abstractmethod
@@ -63,7 +65,9 @@ class UpbitExchangeAPI(AbstractExchangeAPI):
     def get_orders(self, order_ids: List[str]) -> List[Order]:
         pass
 
-    def get_prices(self, price_unit: PriceUnit, counts: int, to: datetime) -> List[Price]:
+    def get_prices(
+        self, price_unit: PriceUnit, counts: int, to: datetime
+    ) -> List[Price]:
         pass
 
     def get_balance(self) -> float:
@@ -89,8 +93,9 @@ class BithumbExchangeAPI(AbstractExchangeAPI):
     def get_orders(self, order_ids: List[str]) -> List[Order]:
         pass
 
-    def get_prices(self, price_unit: PriceUnit, counts: int, to: datetime) -> List[
-        Price]:
+    def get_prices(
+        self, price_unit: PriceUnit, counts: int, to: datetime
+    ) -> List[Price]:
         pass
 
     def get_balance(self) -> float:
@@ -116,8 +121,9 @@ class CoinoneExchangeAPI(AbstractExchangeAPI):
     def get_orders(self, order_ids: List[str]) -> List[Order]:
         pass
 
-    def get_prices(self, price_unit: PriceUnit, counts: int, to: datetime) -> List[
-        Price]:
+    def get_prices(
+        self, price_unit: PriceUnit, counts: int, to: datetime
+    ) -> List[Price]:
         pass
 
     def get_balance(self) -> float:
@@ -130,8 +136,8 @@ class CoinoneExchangeAPI(AbstractExchangeAPI):
 class FakeExchangeAPI(AbstractExchangeAPI):
     def __init__(self, market: Market):
         super().__init__(market)
-        self.fee_rate = 0.0005
-        self._orders = list()
+        self.fee_rate: float = 0.0005
+        self._orders: List[Order] = list()
 
     def buy_order(self, price: float, budget: int) -> Order:
         order = Order(
@@ -148,7 +154,16 @@ class FakeExchangeAPI(AbstractExchangeAPI):
         return order
 
     def sell_order(self, price: float, volume: float) -> Order:
-        order = Order()
+        order = Order(
+            order_id=str(uuid4()),
+            type=OrderType.SELL,
+            status=OrderStatus.WAIT,
+            price=price,
+            ordered_volume=volume,
+            executed_volume=0.0,
+            paid_fee=0.0,
+            ordered_time=datetime.now(),
+        )
         self._orders.append(order)
         return order
 
@@ -167,8 +182,9 @@ class FakeExchangeAPI(AbstractExchangeAPI):
             results.append(order)
         return results
 
-    def get_prices(self, price_unit: PriceUnit, counts: int, to: datetime) -> List[
-        Price]:
+    def get_prices(
+        self, price_unit: PriceUnit, counts: int, to: datetime
+    ) -> List[Price]:
         pass
 
     def get_balance(self) -> float:

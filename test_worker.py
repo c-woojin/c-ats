@@ -64,8 +64,14 @@ def test_get_orders_by_status(get_order: Callable[..., Order]):
 
     assert [wait_order] == worker.get_orders_by_status(statuses=(OrderStatus.WAIT,))
     assert [done_order] == worker.get_orders_by_status(statuses=(OrderStatus.DONE,))
-    assert [cancel_order] == worker.get_orders_by_status(statuses=(OrderStatus.CANCEL,))
-    assert {wait_order, done_order, cancel_order} == set(worker.get_orders_by_status(statuses=(OrderStatus.WAIT, OrderStatus.DONE, OrderStatus.CANCEL)))
+    assert [cancel_order] == worker.get_orders_by_status(
+        statuses=(OrderStatus.CANCEL,)
+    )
+    assert {wait_order, done_order, cancel_order} == set(
+        worker.get_orders_by_status(
+            statuses=(OrderStatus.WAIT, OrderStatus.DONE, OrderStatus.CANCEL)
+        )
+    )
 
 
 def test_update_orders_from_api():

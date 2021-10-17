@@ -3,8 +3,13 @@ from typing import Dict, Type, List, Optional, Tuple, Set
 from uuid import uuid4
 
 from constants import Exchange, Market, WorkerStatus, DEFAULT_BUDGET, OrderStatus
-from exchange_api import AbstractExchangeAPI, UpbitExchangeAPI, BithumbExchangeAPI, \
-    CoinoneExchangeAPI, FakeExchangeAPI
+from exchange_api import (
+    AbstractExchangeAPI,
+    UpbitExchangeAPI,
+    BithumbExchangeAPI,
+    CoinoneExchangeAPI,
+    FakeExchangeAPI,
+)
 from models.order import Order
 from values import Price
 
@@ -42,7 +47,9 @@ class Worker:
     def is_buy_timing(self) -> bool:
         price_average = self.calculate_price_average()
         trade_price = self.get_trade_price()
-        return True if trade_price < price_average else False
+        if price_average and trade_price:
+            return True if trade_price < price_average else False
+        return False
 
     # Budgets related
     def get_unit_budget(self) -> int:
@@ -56,7 +63,9 @@ class Worker:
         wait_orders = self.get_orders_by_status(statuses=(OrderStatus.WAIT,))
         if wait_orders:
             api = self.get_api()
-            updated_orders = api.get_orders(order_ids=[order.order_id for order in wait_orders])
+            updated_orders = api.get_orders(
+                order_ids=[order.order_id for order in wait_orders]
+            )
             self.orders.update(set(updated_orders))
 
     def get_orders_by_status(self, statuses: Tuple[OrderStatus, ...]) -> List[Order]:
@@ -66,12 +75,14 @@ class Worker:
 
     # Prices related
     def get_trade_price(self) -> Optional[float]:
-        return max(self.prices).trade_price if self.prices else None
+        return max(self.prices).trade_price if self.prices else None  # type: ignore
 
     def calculate_price_average(self) -> Optional[float]:
         if self.prices:
             all_price = sum(self.prices[1:], self.prices[0])
-            price_sum = all_price.high_price + all_price.low_price + all_price.trade_price
+            price_sum = (
+                all_price.high_price + all_price.low_price + all_price.trade_price
+            )
             return price_sum / (3 * len(self.prices))
         return None
 
