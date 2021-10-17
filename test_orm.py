@@ -4,6 +4,7 @@ from typing import Callable
 
 from sqlalchemy.orm import Session
 
+from constants import WorkerStatus
 from models.order import Order
 from models.worker import Worker
 
@@ -49,3 +50,17 @@ def test_saving_workers(session: Session, get_worker: Callable[..., Worker]):
         'SELECT * FROM "workers"'
     )
     assert list(rows) == [(w.worker_id, w.market, w.status, w.budget, w.exchange)]
+
+
+def test_updating_workers(session: Session, get_worker: Callable[..., Worker]):
+    w = get_worker(status=WorkerStatus.WATCHING)
+    session.add(w)
+    session.commit()
+
+    w.status = WorkerStatus.BUYING
+    session.add(w)
+    session.commit()
+    rows = session.execute(
+        'SELECT worker_id, status FROM "workers"'
+    )
+    assert list(rows) == [(w.worker_id, w.status)]
