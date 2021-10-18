@@ -1,6 +1,6 @@
 from __future__ import annotations
 from dataclasses import dataclass, field
-from typing import Dict, Type, List, Optional, Tuple, Set
+from typing import Dict, Type, List, Optional, Tuple, Set, Any
 from uuid import uuid4
 
 from cats.domain.constants import (
@@ -81,6 +81,9 @@ class Worker:
         self._update_prices_from_api()
         api = self._get_api()
         latest_order = self._get_latest_order()
+        if latest_order is None:
+            # implements error handling
+            return
 
         if self._need_to_cancel_buy_order_due_to_trade_price_rising():
             api.cancel_order(latest_order.order_id)
@@ -90,11 +93,12 @@ class Worker:
                 + latest_order.paid_fee
             )
             buy_price_average = self._calculate_buy_price_average()
-            order = api.sell_order(
-                price=buy_price_average * SELL_RATE, volume=self.balance
-            )
-            self.orders.add(order)
-            self.status = WorkerStatus.SELLING
+            if buy_price_average:
+                order = api.sell_order(
+                    price=buy_price_average * SELL_RATE, volume=self.balance
+                )
+                self.orders.add(order)
+                self.status = WorkerStatus.SELLING
         else:
             self.status = WorkerStatus.WATCHING
 
@@ -104,6 +108,9 @@ class Worker:
         self._update_prices_from_api()
         api = self._get_api()
         latest_order = self._get_latest_order()
+        if latest_order is None:
+            # implements error handling
+            return
 
         if self._need_to_cancel_sell_order_due_to_trade_price_drop():
             api.cancel_order(latest_order.order_id)
@@ -276,6 +283,7 @@ class Worker:
     """
     api related
     """
+
     def _get_api(self):
         if self._api:
             return self._api
@@ -285,7 +293,7 @@ class Worker:
     def __hash__(self):
         return hash(self.worker_id)
 
-    def __eq__(self, other: Worker) -> bool:
+    def __eq__(self, other: Any) -> bool:
         if isinstance(other, Worker):
             return self.worker_id == other.worker_id
         return False

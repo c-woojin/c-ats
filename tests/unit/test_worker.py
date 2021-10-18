@@ -43,7 +43,7 @@ def test_work_for_watching_buy_order_when_is_buy_timing_is_true():
         exchange=Exchange.FAKE,
     )
 
-    worker._is_buy_timing = MagicMock(return_value=True)
+    worker._is_buy_timing = MagicMock(return_value=True)  # type: ignore
     worker.work_for_watching()
 
     assert len(worker.orders) == 1

@@ -3,7 +3,7 @@ from pathlib import Path
 from typing import Callable, Optional, Set, List
 
 import pytest
-import requests
+import requests  # type: ignore
 from faker import Faker
 from sqlalchemy import create_engine
 from sqlalchemy.engine import Engine
@@ -55,7 +55,9 @@ def _order(status: Optional[OrderStatus] = None) -> Order:
 @pytest.fixture
 def get_worker() -> Callable[..., Worker]:
     def _get_worker(
-        status: Optional[WorkerStatus] = None, orders: Optional[Set[Order]] = None, market: Optional[Market] = None
+        status: Optional[WorkerStatus] = None,
+        orders: Optional[Set[Order]] = None,
+        market: Optional[Market] = None,
     ) -> Worker:
         return _worker(status, orders, market)
 
@@ -63,7 +65,9 @@ def get_worker() -> Callable[..., Worker]:
 
 
 def _worker(
-    status: Optional[WorkerStatus] = None, orders: Optional[Set[Order]] = None, market: Optional[Market] = None
+    status: Optional[WorkerStatus] = None,
+    orders: Optional[Set[Order]] = None,
+    market: Optional[Market] = None,
 ) -> Worker:
     return Worker(
         market=market or Faker().random_element(elements=Market),
@@ -124,7 +128,13 @@ def add_worker(postgres_session: Session):
             postgres_session.execute(
                 "INSERT INTO workers (worker_id, market, status, budget, exchange)"
                 " VALUES (:worker_id, :market, :status, :budget, :exchange)",
-                dict(worker_id=w.worker_id, market=w.market, status=w.status, budget=w.budget, exchange=w.exchange),
+                dict(
+                    worker_id=w.worker_id,
+                    market=w.market,
+                    status=w.status,
+                    budget=w.budget,
+                    exchange=w.exchange,
+                ),
             )
             workers_added.add(w.worker_id)
         postgres_session.commit()

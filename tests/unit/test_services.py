@@ -1,7 +1,6 @@
 from typing import List, Callable
 
 import pytest
-from sqlalchemy.orm import Session
 
 from cats.service_layer import services
 from cats.domain.constants import Market, WorkerStatus
@@ -21,7 +20,11 @@ class FakeRepository(AbstractRepository):
         return next(w for w in self._workers if w.worker_id == worker_id)
 
     def check_duplicate(self, market: Market) -> bool:
-        workers = [worker for worker in self._workers if worker.market == market and worker.status == WorkerStatus.WATCHING]
+        workers = [
+            worker
+            for worker in self._workers
+            if worker.market == market and worker.status == WorkerStatus.WATCHING
+        ]
         return len(workers) > 0
 
     def list_by_status(self, status: WorkerStatus) -> List[Worker]:

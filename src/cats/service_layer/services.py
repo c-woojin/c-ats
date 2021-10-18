@@ -19,7 +19,9 @@ def add_worker(worker: Worker, uow: AbstractUnitOfWork):
 
 def stat_work(uow: AbstractUnitOfWork) -> None:
     with uow:
-        while watching_workers := uow.workers.list_by_status(status=WorkerStatus.WATCHING):
+        while watching_workers := uow.workers.list_by_status(
+            status=WorkerStatus.WATCHING
+        ):
             for worker in watching_workers:
                 work(worker)
                 uow.commit()

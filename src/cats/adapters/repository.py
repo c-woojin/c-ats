@@ -36,7 +36,11 @@ class SqlAlchemyRepository(AbstractRepository):
         return self.session.query(Worker).filter_by(worker_id=worker_id).one()
 
     def check_duplicate(self, market: Market) -> bool:
-        rows = self.session.query(Worker).filter_by(market=market, status=WorkerStatus.WATCHING).all()
+        rows = (
+            self.session.query(Worker)
+            .filter_by(market=market, status=WorkerStatus.WATCHING)
+            .all()
+        )
         return True if rows else False
 
     def list_by_status(self, status: WorkerStatus) -> List[Worker]:

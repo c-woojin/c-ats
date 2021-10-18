@@ -16,9 +16,10 @@ app = Flask(__name__)
 
 @app.route("/add_worker", methods=["POST"])
 def add_worker_endpoint():
-    req_worker = request.json
     worker = Worker(
-        **req_worker
+        market=request.json["market"],  # type: ignore
+        budget=request.json["budget"],  # type: ignore
+        exchange=request.json["exchange"],  # type: ignore
     )
 
     try:
@@ -31,6 +32,9 @@ def add_worker_endpoint():
 
 @app.route("/start_work", methods=["GET"])
 def start_work_endpoint():
-    t = threading.Thread(target=services.stat_work, kwargs=dict(uow=unit_of_work.SqlAlchemyUnitOfWork()))
+    t = threading.Thread(
+        target=services.stat_work,
+        kwargs=dict(uow=unit_of_work.SqlAlchemyUnitOfWork()),
+    )
     t.start()
     return {"message": "start work!"}, 201

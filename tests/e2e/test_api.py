@@ -1,7 +1,7 @@
 from typing import Callable, List
 
 import pytest
-import requests
+import requests  # type: ignore
 
 from cats import config
 from cats.domain.constants import WorkerStatus
@@ -9,7 +9,9 @@ from cats.domain.models.worker import Worker
 
 
 @pytest.mark.usefixtures("restart_api")
-def test_add_worker_endpoint_returns_400_and_error_message(add_worker: Callable[[List[Worker]], None], get_worker: Callable[..., Worker]):
+def test_add_worker_endpoint_returns_400_and_error_message(
+    add_worker: Callable[[List[Worker]], None], get_worker: Callable[..., Worker]
+):
     worker = get_worker(status=WorkerStatus.WATCHING)
     add_worker([worker])
 
