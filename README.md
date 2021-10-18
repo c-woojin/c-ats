@@ -38,3 +38,11 @@ make install
 ```shell
 make test
 ```
+
+# Lint
+```shell
+make flake
+make mypy
+
+make balck # apply black to all code
+```
