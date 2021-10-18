@@ -3,7 +3,7 @@ from __future__ import annotations
 from dataclasses import dataclass
 from datetime import datetime
 
-from constants import OrderType, OrderStatus
+from cats.domain.constants import OrderType, OrderStatus
 
 
 @dataclass

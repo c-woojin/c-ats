@@ -8,9 +8,9 @@ from uuid import uuid4
 from arrow import Arrow
 from faker import Faker
 
-from models.order import Order
-from constants import Market, PriceUnit, OrderType, OrderStatus
-from values import Price
+from cats.domain.models.order import Order
+from cats.domain.constants import Market, PriceUnit, OrderType, OrderStatus
+from cats.domain.values import Price
 
 
 class APIError(Exception):

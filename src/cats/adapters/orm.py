@@ -11,9 +11,9 @@ from sqlalchemy import (
 )
 from sqlalchemy.orm import mapper, relationship
 
-from models.order import Order
-from models.worker import Worker
-from values import Price
+from cats.domain.models.order import Order
+from cats.domain.models.worker import Worker
+from cats.domain.values import Price
 
 metadata = MetaData()
 

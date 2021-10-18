@@ -3,9 +3,9 @@ from typing import Callable
 
 from sqlalchemy.orm import Session
 
-from constants import WorkerStatus
-from models.order import Order
-from models.worker import Worker
+from cats.domain.constants import WorkerStatus
+from cats.domain.models.order import Order
+from cats.domain.models.worker import Worker
 
 
 def test_order_mapper_can_load_orders(

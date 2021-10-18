@@ -3,10 +3,11 @@ from typing import List, Callable
 import pytest
 from sqlalchemy.orm import Session
 
-import services
-from constants import Market, WorkerStatus
-from models.worker import Worker
-from repository import AbstractRepository
+from cats.service_layer import services
+from cats.domain.constants import Market, WorkerStatus
+from cats.domain.models.worker import Worker
+from cats.adapters.repository import AbstractRepository
+from cats.service_layer.unit_of_work import AbstractUnitOfWork
 
 
 class FakeRepository(AbstractRepository):
@@ -27,25 +28,30 @@ class FakeRepository(AbstractRepository):
         return [worker for worker in self._workers if worker.status == status]
 
 
-class FakeSession(Session):
-    committed = False
+class FakeUnitOfWork(AbstractUnitOfWork):
+    def __init__(self, workers: List[Worker] = []):
+        self.workers = FakeRepository(workers)
+        self.committed = False
 
     def commit(self):
         self.committed = True
 
+    def rollback(self):
+        pass
+
 
 def test_add_worker(get_worker: Callable[..., Worker]):
     worker = get_worker()
-    repo = FakeRepository([])
+    uow = FakeUnitOfWork()
 
-    services.add_worker(worker, repo, FakeSession())
-    assert repo.get(worker.worker_id) == worker
+    services.add_worker(worker, uow)
+    assert uow.workers.get(worker.worker_id) == worker
 
 
 def test_add_worker_with_duplicated_error(get_worker: Callable[..., Worker]):
     worker = get_worker(market=Market.ETH, status=WorkerStatus.WATCHING)
-    repo = FakeRepository([worker])
+    uow = FakeUnitOfWork([worker])
 
     new_worker = get_worker(market=Market.ETH, status=WorkerStatus.WATCHING)
     with pytest.raises(services.WorkerDuplicated):
-        services.add_worker(new_worker, repo, FakeSession())
+        services.add_worker(new_worker, uow)

@@ -2,10 +2,10 @@ from datetime import datetime
 from typing import Callable
 from unittest.mock import MagicMock
 
-from constants import Exchange, WorkerStatus, OrderStatus
-from models.order import Order
-from models.worker import Worker
-from values import Price
+from cats.domain.constants import Exchange, WorkerStatus, OrderStatus
+from cats.domain.models.order import Order
+from cats.domain.models.worker import Worker
+from cats.domain.values import Price
 
 
 def test_is_buy_timing_return_true_when_trader_price_is_lower_then_average():

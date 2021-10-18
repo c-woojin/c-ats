@@ -3,8 +3,8 @@ from typing import List
 
 from sqlalchemy.orm import Session
 
-from constants import Market, WorkerStatus
-from models.worker import Worker
+from cats.domain.constants import Market, WorkerStatus
+from cats.domain.models.worker import Worker
 
 
 class AbstractRepository(ABC):

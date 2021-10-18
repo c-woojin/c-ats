@@ -3,9 +3,9 @@ from typing import Callable, List
 import pytest
 import requests
 
-import config
-from constants import WorkerStatus
-from models.worker import Worker
+from cats import config
+from cats.domain.constants import WorkerStatus
+from cats.domain.models.worker import Worker
 
 
 @pytest.mark.usefixtures("restart_api")

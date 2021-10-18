@@ -10,11 +10,11 @@ from sqlalchemy.engine import Engine
 from sqlalchemy.exc import OperationalError
 from sqlalchemy.orm import sessionmaker, clear_mappers, Session
 
-import config
-from constants import OrderType, OrderStatus, Market, WorkerStatus
-from models.order import Order
-from models.worker import Worker
-from orm import metadata, start_mappers
+from cats import config
+from cats.domain.constants import OrderType, OrderStatus, Market, WorkerStatus
+from cats.domain.models.order import Order
+from cats.domain.models.worker import Worker
+from cats.adapters.orm import metadata, start_mappers
 
 
 @pytest.fixture

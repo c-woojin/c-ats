@@ -2,9 +2,9 @@ from typing import Callable
 
 from sqlalchemy.orm import Session
 
-from models.order import Order
-from models.worker import Worker
-from repository import SqlAlchemyRepository
+from cats.domain.models.order import Order
+from cats.domain.models.worker import Worker
+from cats.adapters.repository import SqlAlchemyRepository
 
 
 def test_repository_can_save_a_worker(

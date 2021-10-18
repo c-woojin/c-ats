@@ -3,7 +3,7 @@ from dataclasses import dataclass, field
 from typing import Dict, Type, List, Optional, Tuple, Set
 from uuid import uuid4
 
-from constants import (
+from cats.domain.constants import (
     Exchange,
     Market,
     WorkerStatus,
@@ -15,7 +15,7 @@ from constants import (
     MIN_ORDER_BUDGET,
     ADDITIONAL_BUY_RATE,
 )
-from models.exchange_api import (
+from cats.domain.models.exchange_api import (
     AbstractExchangeAPI,
     UpbitExchangeAPI,
     BithumbExchangeAPI,
@@ -23,8 +23,8 @@ from models.exchange_api import (
     FakeExchangeAPI,
     APIError,
 )
-from models.order import Order
-from values import Price
+from cats.domain.models.order import Order
+from cats.domain.values import Price
 
 
 def work(worker: Worker) -> None:
