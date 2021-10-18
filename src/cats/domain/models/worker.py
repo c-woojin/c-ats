@@ -18,8 +18,6 @@ from cats.domain.constants import (
 from cats.domain.models.exchange_api import (
     AbstractExchangeAPI,
     UpbitExchangeAPI,
-    BithumbExchangeAPI,
-    CoinoneExchangeAPI,
     FakeExchangeAPI,
     APIError,
 )
@@ -42,8 +40,6 @@ def work(worker: Worker) -> None:
 
 EXCHANGE_APIS: Dict[str, Type[AbstractExchangeAPI]] = {
     Exchange.UPBIT: UpbitExchangeAPI,
-    Exchange.BITHUMB: BithumbExchangeAPI,
-    Exchange.COINONE: CoinoneExchangeAPI,
     Exchange.FAKE: FakeExchangeAPI,
 }
 
